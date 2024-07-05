@@ -1,16 +1,11 @@
 import bpy  # type: ignore
-import sys
 import os
 
 
 def create_sphere_at_bone(bone, armature):
-    bpy.ops.mesh.primitive_uv_sphere_add(
-        radius=0.05, location=armature.matrix_world @ bone.head_local
-    )
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.1, location=bone.head)
     sphere = bpy.context.object
     sphere.name = f"Sphere_{bone.name}"
-
-    # Parent the sphere to the bone
     mod = sphere.modifiers.new(name="Armature", type="ARMATURE")
     mod.object = armature
     sphere.parent = armature
@@ -28,19 +23,16 @@ def convert_bvh_to_glb(directory, output_name):
             continue
         bvh_path = os.path.join(directory, filename)
         bpy.ops.import_anim.bvh(filepath=bvh_path)
+        bpy.context.scene.render.fps = 60
 
         armature = bpy.context.object
-        print(armature.active_material)
         if armature.type != "ARMATURE":
             continue
         bpy.context.view_layer.objects.active = armature
-        armature.data.display_type = "WIRE"
+        armature.data.display_type = "ENVELOPE"
         armature.data.pose_position = "POSE"
         armature.data.show_bone_colors = True
 
-        armature.scale = (10, 10, 10)
-
-        # bpy.ops.object.mode_set(mode="POSE")
         for bone in armature.pose.bones:
             create_sphere_at_bone(bone.bone, armature)
 
@@ -52,4 +44,4 @@ def convert_bvh_to_glb(directory, output_name):
 
 
 if __name__ == "__main__":
-    convert_bvh_to_glb("output_BVH", "output")
+    convert_bvh_to_glb("output_BVH", "babylon_viewer/output")
