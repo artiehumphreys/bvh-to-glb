@@ -1,5 +1,5 @@
 import bpy  # type: ignore
-import mathutils
+import mathutils  # type: ignore
 import os
 
 
@@ -27,6 +27,7 @@ def convert_bvh_to_glb(directory, output_name):
             continue
         bvh_path = os.path.join(directory, filename)
         bpy.ops.import_anim.bvh(filepath=bvh_path)
+        bpy.context.scene.render.fps = 60
 
         armature = bpy.context.object
         if armature.type != "ARMATURE":
