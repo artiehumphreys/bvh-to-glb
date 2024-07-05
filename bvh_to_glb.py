@@ -1,16 +1,14 @@
 import bpy  # type: ignore
-import mathutils  # type: ignore
 import os
 
 
 def create_sphere_at_bone(bone, armature):
-    bpy.ops.mesh.primitive_uv_sphere_add(
-        radius=0.075, location=armature.matrix_world @ bone.head_local
-    )
+    bone_length = (bone.tail_local - bone.tail_local).length
+
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.075, location=bone.head)
     sphere = bpy.context.object
     sphere.name = f"Sphere_{bone.name}"
     mod = sphere.modifiers.new(name="Armature", type="ARMATURE")
-    bone_length = (bone.tail_local - bone.head_local).length
     mod.object = armature
     sphere.parent = armature
     sphere.parent_type = "BONE"
