@@ -1,17 +1,16 @@
 import bpy  # type: ignore
-import sys
+import mathutils
 import os
 
 
 def create_sphere_at_bone(bone, armature):
     bpy.ops.mesh.primitive_uv_sphere_add(
-        radius=0.05, location=armature.matrix_world @ bone.head_local
+        radius=0.075, location=armature.matrix_world @ bone.head_local
     )
     sphere = bpy.context.object
     sphere.name = f"Sphere_{bone.name}"
-
-    # Parent the sphere to the bone
     mod = sphere.modifiers.new(name="Armature", type="ARMATURE")
+    bone_length = (bone.tail_local - bone.head_local).length
     mod.object = armature
     sphere.parent = armature
     sphere.parent_type = "BONE"
@@ -30,15 +29,12 @@ def convert_bvh_to_glb(directory, output_name):
         bpy.ops.import_anim.bvh(filepath=bvh_path)
 
         armature = bpy.context.object
-        print(armature.active_material)
         if armature.type != "ARMATURE":
             continue
         bpy.context.view_layer.objects.active = armature
-        armature.data.display_type = "WIRE"
+        armature.data.display_type = "ENVELOPE"
         armature.data.pose_position = "POSE"
         armature.data.show_bone_colors = True
-
-        armature.scale = (10, 10, 10)
 
         # bpy.ops.object.mode_set(mode="POSE")
         for bone in armature.pose.bones:
