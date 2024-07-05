@@ -3,9 +3,7 @@ import os
 
 
 def create_sphere_at_bone(bone, armature):
-    bone_length = (bone.tail_local - bone.tail_local).length
-
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.075, location=bone.head)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.1, location=bone.head)
     sphere = bpy.context.object
     sphere.name = f"Sphere_{bone.name}"
     mod = sphere.modifiers.new(name="Armature", type="ARMATURE")
@@ -35,7 +33,6 @@ def convert_bvh_to_glb(directory, output_name):
         armature.data.pose_position = "POSE"
         armature.data.show_bone_colors = True
 
-        # bpy.ops.object.mode_set(mode="POSE")
         for bone in armature.pose.bones:
             create_sphere_at_bone(bone.bone, armature)
 
