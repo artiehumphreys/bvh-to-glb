@@ -44,4 +44,4 @@ def convert_bvh_to_glb(directory, output_name):
 
 
 if __name__ == "__main__":
-    convert_bvh_to_glb("output_BVH", "output")
+    convert_bvh_to_glb("output_BVH", "babylon_viewer/output")
