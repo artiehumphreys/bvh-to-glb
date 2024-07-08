@@ -3,9 +3,10 @@ import os
 
 
 def create_sphere_at_bone(bone, armature):
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.1, location=bone.head)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=min(0.1, bone.length), location=bone.head)
     sphere = bpy.context.object
-    sphere.name = f"Sphere_{bone.name}"
+    sphere.name = f"sphere_{bone.name}"
+
     mod = sphere.modifiers.new(name="Armature", type="ARMATURE")
     mod.object = armature
     sphere.parent = armature
