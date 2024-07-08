@@ -7,6 +7,11 @@ def create_sphere_at_bone(bone, armature):
     bpy.ops.mesh.primitive_uv_sphere_add(radius=bone.head_radius, location=bone.head_local)
     sphere = bpy.context.object
     sphere.name = f"sphere_{bone.name}"
+    if bone.name == 'baseHead':
+        scale = 1.25
+        head_height = 0.15
+        sphere.location += mathutils.Vector((0, 0, head_height))
+        sphere.scale = (scale, scale, scale)
 
     mod = sphere.modifiers.new(name="Armature", type="ARMATURE")
     mod.object = armature
@@ -16,26 +21,25 @@ def create_sphere_at_bone(bone, armature):
 
 
 def create_cone_arm(bone, armature):
-    parent_tail_world = armature.matrix_world @ bone.parent.head_local
-    bone_head_world = armature.matrix_world @ bone.head_local
+    parent = bone.parent
 
-    cone_vector = bone_head_world - parent_tail_world
+    cone_vector = bone.head_local - parent.head_local
     cone_length = cone_vector.length
     cone_direction = cone_vector.normalized()
 
-    cone_midpoint_world = (parent_tail_world + bone_head_world) / 2
+    cone_midpoint_world = (parent.head_local + bone.head_local) / 2
 
     scale = 1.25
     bpy.ops.mesh.primitive_cone_add(radius1=bone.head_radius / scale, radius2=bone.tail_radius / scale, depth=cone_length, location=cone_midpoint_world)
     cone = bpy.context.object
-    cone.name = f"Cone_{bone.parent.name}_to_{bone.name}"
+    cone.name = f"Cone_{parent.name}_to_{bone.name}"
 
     rotation = cone_direction.to_track_quat('Z', 'Y').to_euler()
     cone.rotation_euler = rotation
 
     cone.parent = armature
     cone.parent_type = "BONE"
-    cone.parent_bone = bone.parent.name
+    cone.parent_bone = parent.name
 
 
 def convert_bvh_to_glb(directory, output_name):
