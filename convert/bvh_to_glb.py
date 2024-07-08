@@ -2,13 +2,14 @@ import bpy  # type: ignore
 import os
 import mathutils # type: ignore
 
+scale = 1.25
 
 def create_sphere_at_bone(bone, armature):
+    global scale
     bpy.ops.mesh.primitive_uv_sphere_add(radius=bone.head_radius, location=bone.head_local)
     sphere = bpy.context.object
     sphere.name = f"sphere_{bone.name}"
     if bone.name == 'baseHead':
-        scale = 1.25
         head_height = 0.15
         sphere.location += mathutils.Vector((0, 0, head_height))
         sphere.scale = (scale, scale, scale)
@@ -21,6 +22,7 @@ def create_sphere_at_bone(bone, armature):
 
 
 def create_cone_arm(bone, armature):
+    global scale
     parent = bone.parent
 
     cone_vector = bone.head_local - parent.head_local
@@ -29,7 +31,6 @@ def create_cone_arm(bone, armature):
 
     cone_midpoint_world = (parent.head_local + bone.head_local) / 2
 
-    scale = 1.25
     bpy.ops.mesh.primitive_cone_add(radius1=bone.head_radius / scale, radius2=bone.tail_radius / scale, depth=cone_length, location=cone_midpoint_world)
     cone = bpy.context.object
     cone.name = f"Cone_{parent.name}_to_{bone.name}"
@@ -63,7 +64,6 @@ def convert_bvh_to_glb(directory, output_name):
         armature.data.show_bone_colors = True
 
         for bone in armature.pose.bones:
-            print(bone.name)
             bone.bone.use_local_location = True
             bone.bone.use_relative_parent = True
             create_sphere_at_bone(bone.bone, armature)
