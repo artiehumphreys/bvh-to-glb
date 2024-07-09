@@ -10,7 +10,7 @@ class bvh_to_glb:
         self.output_path: str = output_path
         self.filename: str = ""
         self.player_ids: dict[int, str] = {}
-        self.teams: set[str] = set()
+        self.teams: dict[str, int] = {}
         self.scale: float = 1.25
         self.dir = dir
         self.process_players(self.dir)
@@ -26,7 +26,7 @@ class bvh_to_glb:
             filename = Path(file).stem
             split = filename.split("_")
             if not split[1] in self.teams:
-                self.teams.add(split[1])
+                self.teams[split[1]] = len(self.teams)
             self.player_ids[int(split[2])] = ""
         self.read_csv()
 
@@ -39,10 +39,11 @@ class bvh_to_glb:
                     continue
                 self.player_ids[player_id] = row["player_name"]
 
-    def assign_team(self, shape):
+    def assign_team_color(self, shape):
         team = self.get_team()
+        color = self.teams[team]
         mat = bpy.data.materials.new(name=f"Material_{team}")
-        mat.diffuse_color = (1, 1, 1, 1)
+        mat.diffuse_color = (color, color, 1, 1)
         shape.data.materials.append(mat)
 
     def create_sphere_at_bone(self, bone, armature):
@@ -68,7 +69,7 @@ class bvh_to_glb:
         sphere.parent = armature
         sphere.parent_type = "BONE"
         sphere.parent_bone = bone.name
-        self.assign_team(sphere)
+        self.assign_team_color(sphere)
 
     def create_cone_arm(self, bone, armature):
         parent = bone.parent
@@ -94,7 +95,7 @@ class bvh_to_glb:
         cone.parent = armature
         cone.parent_type = "BONE"
         cone.parent_bone = parent.name
-        self.assign_team(cone)
+        self.assign_team_color(cone)
 
     def convert_bvh_to_glb(self, output_name):
         bpy.ops.wm.read_factory_settings(use_empty=True)
