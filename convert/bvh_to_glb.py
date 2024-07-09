@@ -69,9 +69,6 @@ def convert_bvh_to_glb(directory, output_name):
         if armature.type != "ARMATURE":
             continue
         bpy.context.view_layer.objects.active = armature
-        armature.data.display_type = "ENVELOPE"
-        armature.data.pose_position = "POSE"
-        armature.data.show_bone_colors = True
 
         for bone in armature.pose.bones:
             bone.bone.use_local_location = True
@@ -79,8 +76,6 @@ def convert_bvh_to_glb(directory, output_name):
             create_sphere_at_bone(bone.bone, armature)
             if bone.bone.parent:
                 create_cone_arm(bone.bone, armature)
-
-        bpy.ops.object.mode_set(mode="OBJECT")
 
     bpy.ops.object.select_all(action="SELECT")
 
