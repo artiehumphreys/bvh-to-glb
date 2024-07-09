@@ -2,22 +2,36 @@ import bpy  # type: ignore
 import os
 import mathutils # type: ignore
 from pathlib import Path
+import csv
 
 class bvh_to_glb:
     def __init__(self, output_path = "babylon_viewer/output"):
-        self.output_path = output_path
-        self.filename = ""
+        self.output_path: str = output_path
+        self.filename: str = ""
         self.player_ids: dict[int, str] = {}
         self.teams: set[str] = set()
-        self.scale = 1.25
+        self.scale: float = 1.25
 
-    def process_teams_ids(self):
-        split = self.filename.split('_')[1]
-        if not split[1] in self.teams:
-            self.teams.add(split[1])
-        self.player_ids[split[2]] = ""
+    def process_players(self, directory):
+        for file in os.listdir(directory):
+            if not file.endswith(".bvh"):
+                continue
+            filename = Path(file).stem
+            split = filename.split('_')
+            if not split[1] in self.teams:
+                self.teams.add(split[1])
+            self.player_ids[int(split[2])] = ""
+        self.read_csv()
 
-    # def read_csv(self,file = r"players 1.csv"):
+    def read_csv(self, file = r"players 1.csv"):
+        with open(file, mode='r') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                player_id = int(row['player_id'])
+                if player_id not in self.player_ids:
+                    continue
+                self.player_ids[player_id] = row['player_name']
+
 
     def create_sphere_at_bone(self, bone, armature):
         if bone.name == 'lWrist' or bone.name == 'rWrist':
@@ -62,6 +76,9 @@ class bvh_to_glb:
 
 
     def convert_bvh_to_glb(self, directory, output_name):
+        self.process_players(directory)
+        print(self.player_ids)
+
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
         bpy.ops.wm.obj_import(filepath="Basketball_court.obj")
@@ -70,7 +87,6 @@ class bvh_to_glb:
             if not file.endswith(".bvh"):
                 continue
             self.filename = Path(file).stem
-            self.process_teams_ids()
 
             bvh_path = os.path.join(directory, file)
             bpy.ops.import_anim.bvh(filepath=bvh_path)
