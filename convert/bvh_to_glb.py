@@ -6,6 +6,18 @@ from pathlib import Path
 scale = 1.25
 output_path = "babylon_viewer/output"
 file_name = ""
+player_ids: dict[int, str] = {}
+teams: set[str] = set()
+
+def process_teams_ids(filename):
+    global player_ids, teams
+    split = filename.split('_')[1]
+    if not split[1] in teams:
+        teams.add(split[1])
+    if not split[2] in player_ids:
+        player_ids[split[2]] = ""
+
+
 
 def create_sphere_at_bone(bone, armature):
     if bone.name == 'lWrist' or bone.name == 'rWrist':
@@ -60,6 +72,7 @@ def convert_bvh_to_glb(directory, output_name):
         if not filename.endswith(".bvh"):
             continue
         file_name = Path(filename).stem
+        process_teams_ids(file_name)
 
         bvh_path = os.path.join(directory, filename)
         bpy.ops.import_anim.bvh(filepath=bvh_path)
