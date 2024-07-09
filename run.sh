@@ -12,6 +12,10 @@ lsof -t -i:5500 | xargs kill -9 2>/dev/null || true
 id=$(chrome-cli list links | grep 'localhost:5500' | awk -F'[:\\]]' '{print $2}' | awk '{print $1}')
 python -m http.server 5500 &
 sleep 1
-chrome-cli close -t $id
-open http://localhost:5500/
+if [ -z "$id" ]; then
+    open http://localhost:5500/
+else
+    chrome-cli activate -t $id
+    chrome-cli reload -t $id
+fi
 cd ..
