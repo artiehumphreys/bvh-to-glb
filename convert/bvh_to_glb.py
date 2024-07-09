@@ -1,18 +1,26 @@
 import bpy  # type: ignore
 import os
 import mathutils # type: ignore
+from pathlib import Path
 
 scale = 1.25
+output_path = "babylon_viewer/output"
+file_name = ""
 
 def create_sphere_at_bone(bone, armature):
-    global scale
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=bone.head_radius, location=bone.head_local)
+    if bone.name == 'lWrist' or bone.name == 'rWrist':
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=bone.head_radius / scale, location=bone.head_local)
+        sphere = bpy.context.object
+        sphere.scale = ((bone.head_local - bone.tail_local).length * 10, 1, 1)
+    else:    
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=bone.head_radius, location=bone.head_local)
     sphere = bpy.context.object
-    sphere.name = f"sphere_{bone.name}"
+    sphere.name = f"sphere_{bone.name}_{file_name}"
     if bone.name == 'baseHead':
         head_height = 0.15
         sphere.location += mathutils.Vector((0, 0, head_height))
         sphere.scale = (scale, scale, scale)
+
 
     mod = sphere.modifiers.new(name="Armature", type="ARMATURE")
     mod.object = armature
@@ -22,7 +30,6 @@ def create_sphere_at_bone(bone, armature):
 
 
 def create_cone_arm(bone, armature):
-    global scale
     parent = bone.parent
 
     cone_vector = bone.head_local - parent.head_local
@@ -33,7 +40,7 @@ def create_cone_arm(bone, armature):
 
     bpy.ops.mesh.primitive_cone_add(radius1=bone.head_radius / scale, radius2=bone.tail_radius / scale, depth=cone_length, location=cone_midpoint_world)
     cone = bpy.context.object
-    cone.name = f"Cone_{parent.name}_to_{bone.name}"
+    cone.name = f"Cone_{parent.name}_to_{bone.name}_{file_name}"
 
     rotation = cone_direction.to_track_quat('Z', 'Y').to_euler()
     cone.rotation_euler = rotation
@@ -44,6 +51,7 @@ def create_cone_arm(bone, armature):
 
 
 def convert_bvh_to_glb(directory, output_name):
+    global file_name
     bpy.ops.wm.read_factory_settings(use_empty=True)
 
     bpy.ops.wm.obj_import(filepath="Basketball_court.obj")
@@ -51,6 +59,8 @@ def convert_bvh_to_glb(directory, output_name):
     for filename in os.listdir(directory):
         if not filename.endswith(".bvh"):
             continue
+        file_name = Path(filename).stem
+
         bvh_path = os.path.join(directory, filename)
         bpy.ops.import_anim.bvh(filepath=bvh_path)
         bpy.context.scene.render.fps = 60
@@ -78,4 +88,4 @@ def convert_bvh_to_glb(directory, output_name):
 
 
 if __name__ == "__main__":
-    convert_bvh_to_glb("output_BVH", "babylon_viewer/output")
+    convert_bvh_to_glb("output_BVH", output_path)
