@@ -6,19 +6,18 @@ from pathlib import Path
 class bvh_to_glb:
     def __init__(self, output_path = "babylon_viewer/output"):
         self.output_path = output_path
-        self.file_name = ""
+        self.filename = ""
         self.player_ids: dict[int, str] = {}
         self.teams: set[str] = set()
         self.scale = 1.25
 
-    def process_teams_ids(self, filename):
-        global player_ids, teams
-        split = filename.split('_')[1]
-        if not split[1] in teams:
-            teams.add(split[1])
-        player_ids[split[2]] = ""
+    def process_teams_ids(self):
+        split = self.filename.split('_')[1]
+        if not split[1] in self.teams:
+            self.teams.add(split[1])
+        self.player_ids[split[2]] = ""
 
-    # def read_csv(self,filename = r"players 1.csv"):
+    # def read_csv(self,file = r"players 1.csv"):
 
     def create_sphere_at_bone(self, bone, armature):
         if bone.name == 'lWrist' or bone.name == 'rWrist':
@@ -28,7 +27,7 @@ class bvh_to_glb:
         else:    
             bpy.ops.mesh.primitive_uv_sphere_add(radius=bone.head_radius, location=bone.head_local)
         sphere = bpy.context.object
-        sphere.name = f"sphere_{bone.name}_{file_name}"
+        sphere.name = f"sphere_{bone.name}_{self.filename}"
         if bone.name == 'baseHead':
             head_height = 0.15
             sphere.location += mathutils.Vector((0, 0, head_height))
@@ -52,7 +51,7 @@ class bvh_to_glb:
 
         bpy.ops.mesh.primitive_cone_add(radius1=bone.head_radius / self.scale, radius2=bone.tail_radius / self.scale, depth=cone_length, location=cone_midpoint_world)
         cone = bpy.context.object
-        cone.name = f"Cone_{parent.name}_to_{bone.name}_{file_name}"
+        cone.name = f"Cone_{parent.name}_to_{bone.name}_{self.filename}"
 
         rotation = cone_direction.to_track_quat('Z', 'Y').to_euler()
         cone.rotation_euler = rotation
@@ -63,18 +62,17 @@ class bvh_to_glb:
 
 
     def convert_bvh_to_glb(self, directory, output_name):
-        global file_name
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
         bpy.ops.wm.obj_import(filepath="Basketball_court.obj")
 
-        for filename in os.listdir(directory):
-            if not filename.endswith(".bvh"):
+        for file in os.listdir(directory):
+            if not file.endswith(".bvh"):
                 continue
-            file_name = Path(filename).stem
-            self.process_teams_ids(file_name)
+            self.filename = Path(file).stem
+            self.process_teams_ids()
 
-            bvh_path = os.path.join(directory, filename)
+            bvh_path = os.path.join(directory, file)
             bpy.ops.import_anim.bvh(filepath=bvh_path)
             bpy.context.scene.render.fps = 60
 
