@@ -19,6 +19,10 @@ class bvh_to_glb:
         split = self.filename.split("_")
         return split[1]
 
+    def get_player_name(self):
+        split = self.filename.split("_")
+        return self.player_ids[int(split[2])]
+
     def process_players(self, directory):
         for file in os.listdir(directory):
             if not file.endswith(".bvh"):
@@ -97,6 +101,30 @@ class bvh_to_glb:
         cone.parent_bone = parent.name
         self.assign_team_color(cone)
 
+    def display_name(
+        self,
+        armature,
+    ):
+        bone_name = "pelvis"
+        player_name = self.get_player_name()
+        bpy.ops.object.text_add(location=(0, 0, 0.1))
+        text_obj = bpy.context.object
+        text_obj.data.body = player_name
+        text_obj.name = "name_text"
+
+        bpy.ops.object.empty_add(type="PLAIN_AXES", location=(0, 0, 0.1))
+        empty_obj = bpy.context.object
+        empty_obj.name = "name_empty"
+
+        text_obj.parent = empty_obj
+        empty_obj.parent = armature
+        empty_obj.parent_type = "BONE"
+        empty_obj.parent_bone = bone_name
+
+        empty_obj.matrix_parent_inverse = armature.matrix_world.inverted()
+
+        bpy.context.view_layer.update()
+
     def convert_bvh_to_glb(self, output_name):
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
@@ -122,6 +150,10 @@ class bvh_to_glb:
                 self.create_sphere_at_bone(bone.bone, armature)
                 if bone.bone.parent:
                     self.create_cone_arm(bone.bone, armature)
+                if bone.name == "pelvis":
+                    self.display_name(
+                        armature,
+                    )
 
         bpy.ops.object.select_all(action="SELECT")
 
