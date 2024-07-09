@@ -52,7 +52,7 @@ def convert_bvh_to_glb(directory, output_name):
         if not filename.endswith(".bvh"):
             continue
         bvh_path = os.path.join(directory, filename)
-        bpy.ops.import_anim.bvh(filepath=bvh_path, rotate_mode = 'XYZ')
+        bpy.ops.import_anim.bvh(filepath=bvh_path)
         bpy.context.scene.render.fps = 60
 
         armature = bpy.context.object
