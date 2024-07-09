@@ -107,6 +107,7 @@ class bvh_to_glb:
     ):
         bone_name = "pelvis"
         player_name = self.get_player_name()
+
         bpy.ops.object.text_add(location=(0, 0, 0.1))
         text_obj = bpy.context.object
         text_obj.data.body = player_name
@@ -117,11 +118,15 @@ class bvh_to_glb:
         empty_obj.name = "name_empty"
 
         text_obj.parent = empty_obj
-        empty_obj.parent = armature
-        empty_obj.parent_type = "BONE"
-        empty_obj.parent_bone = bone_name
 
-        empty_obj.matrix_parent_inverse = armature.matrix_world.inverted()
+        empty_obj.location.z = 0.1
+
+        constraint = empty_obj.constraints.new(type="COPY_LOCATION")
+        constraint.target = armature
+        constraint.subtarget = bone_name
+        constraint.use_x = True
+        constraint.use_y = True
+        constraint.use_z = False
 
         bpy.context.view_layer.update()
 
