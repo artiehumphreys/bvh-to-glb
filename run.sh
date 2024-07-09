@@ -1,4 +1,10 @@
 #!/bin/sh
+cleanup() {
+    lsof -t -i:5500 | xargs kill -9 2>/dev/null || true
+    exit 0
+}
+
+trap cleanup INT
 cd $(pwd) || exit
 brew list python &>/dev/null || brew install python
 brew list chrome-cli &>/dev/null || brew install chrome-cli
@@ -8,9 +14,9 @@ python -m pip install --upgrade pip &>/dev/null
 python -m pip install -r requirements.txt
 venv/bin/python convert/bvh_to_glb.py
 cd babylon_viewer
-lsof -t -i:5500 | xargs kill -9 2>/dev/null || true
 id=$(chrome-cli list links | grep 'localhost:5500' | awk -F'[:\\]]' '{print $2}' | awk '{print $1}')
 python -m http.server 5500 &
+HTTP_SERVER_PID=$!
 sleep 0.5
 if [ -z "$id" ]; then
     open http://localhost:5500/
@@ -18,4 +24,5 @@ else
     chrome-cli activate -t $id
     chrome-cli reload -t $id
 fi
+wait $HTTP_SERVER_PID
 cd ..
