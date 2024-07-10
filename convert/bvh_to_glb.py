@@ -48,7 +48,7 @@ class bvh_to_glb:
                 self.player_ids[player_id] = row["player_name"]
 
     def read_ball_csv(self, file="Ball_Track.csv"):
-        frame = 0
+        frame = 1
         with open(file, mode="r") as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
@@ -165,7 +165,6 @@ class bvh_to_glb:
                 )
             else:
                 text_obj.location.x = 1
-                text_obj.rotation_euler[2] = 1.5708
 
             text_obj.keyframe_insert(data_path="location", index=-1)
             text_obj.keyframe_insert(data_path="rotation_euler", index=2)
@@ -180,7 +179,7 @@ class bvh_to_glb:
         material.diffuse_color = (1, 0.3, 0.1, 1)
         ball_obj.data.materials.append(material)
 
-        for frame in range(self.start_frame, self.end_frame):
+        for frame in range(self.start_frame, self.end_frame + 1):
             bpy.context.scene.frame_set(frame)
             ball_obj.location = self.ball_track[frame]
             ball_obj.keyframe_insert(data_path="location", index=-1)
