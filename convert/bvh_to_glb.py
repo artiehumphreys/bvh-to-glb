@@ -3,7 +3,6 @@ import os
 import mathutils  # type: ignore
 from pathlib import Path
 import csv
-import pandas as pd
 
 
 class bvh_to_glb:
