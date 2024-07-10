@@ -3,6 +3,7 @@ import os
 import mathutils  # type: ignore
 from pathlib import Path
 import csv
+import pandas as pd
 
 
 class bvh_to_glb:
@@ -11,10 +12,12 @@ class bvh_to_glb:
         self.filename: str = ""
         self.player_ids: dict[int, str] = {}
         self.teams: dict[str, int] = {}
+        self.ball_track: dict[int, tuple] = {}
         self.scale: float = 1.25
         self.dir = dir
         self.start_frame, self.end_frame = 0, 0
         self.process_players(self.dir)
+        self.read_ball_csv()
 
     def get_team(self):
         split = self.filename.split("_")
@@ -33,9 +36,9 @@ class bvh_to_glb:
             if not split[1] in self.teams:
                 self.teams[split[1]] = len(self.teams)
             self.player_ids[int(split[2])] = ""
-        self.read_csv()
+        self.read_player_csv()
 
-    def read_csv(self, file=r"players 1.csv"):
+    def read_player_csv(self, file=r"players 1.csv"):
         with open(file, mode="r") as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
@@ -43,6 +46,18 @@ class bvh_to_glb:
                 if player_id not in self.player_ids:
                     continue
                 self.player_ids[player_id] = row["player_name"]
+
+    def read_ball_csv(self, file="Ball_Track.csv"):
+        frame = 0
+        with open(file, mode="r") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                self.ball_track[frame] = (
+                    float(row["X"]),
+                    float(row["Y"]),
+                    float(row["Z"]),
+                )
+                frame += 1
 
     def assign_team_color(self, shape):
         team = self.get_team()
@@ -145,7 +160,19 @@ class bvh_to_glb:
 
         text_obj.location.x = 1
 
+    def display_ball(self):
+        bpy.ops.object.select_all(action="DESELECT")
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=29.5 / 200, location=(0, 0, 0))
+        ball_obj = bpy.context.active_object
+        ball_obj.name = "ball"
+
+        for frame in range(self.start_frame, self.end_frame):
+            bpy.context.scene.frame_set(frame)
+            ball_obj.location = self.ball_track[frame]
+            ball_obj.keyframe_insert(data_path="location", index=-1)
+
     def convert_bvh_to_glb(self, output_name):
+        display_ball = False
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
         bpy.ops.wm.obj_import(filepath="court.obj")
@@ -170,6 +197,10 @@ class bvh_to_glb:
                 exit(1)
             self.start_frame = int(action.frame_range[0])
             self.end_frame = int(action.frame_range[1])
+
+            if not display_ball:
+                self.display_ball()
+                display_ball = True
 
             for bone in armature.pose.bones:
                 bone.bone.use_local_location = True
