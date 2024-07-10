@@ -13,6 +13,7 @@ class bvh_to_glb:
         self.teams: dict[str, int] = {}
         self.scale: float = 1.25
         self.dir = dir
+        self.start_frame, self.end_frame = 0, 0
         self.process_players(self.dir)
 
     def get_team(self):
@@ -101,39 +102,42 @@ class bvh_to_glb:
         cone.parent_bone = parent.name
         self.assign_team_color(cone)
 
-    def display_name(
-        self,
-        armature,
-    ):
-        bone_name = "pelvis"
+    def display_name(self, armature):
         player_name = self.get_player_name()
-
-        bpy.ops.object.text_add(location=(0, 0, 0.1))
-        text_obj = bpy.context.object
-        text_obj.data.body = player_name
-        text_obj.name = "name_text"
+        bpy.ops.object.select_all(action="DESELECT")
 
         bpy.ops.object.empty_add(type="PLAIN_AXES", location=(0, 0, 0.1))
-        empty_obj = bpy.context.object
-        empty_obj.name = "name_empty"
+        empty_obj = bpy.context.active_object
+        empty_obj.name = "empty"
+
+        bpy.ops.object.text_add(
+            location=(0, 0, 0.1), radius=0.6, rotation=(0, 0, 1.5708)
+        )
+        text_obj = bpy.context.active_object
+        text_obj.name = "text"
+        text_obj.data.body = player_name
 
         text_obj.parent = empty_obj
 
-        empty_obj.location.z = 0.1
-
-        constraint = empty_obj.constraints.new(type="COPY_LOCATION")
+        pelvis_bone = armature.pose.bones["pelvis"]
+        constraint = empty_obj.constraints.new("COPY_LOCATION")
         constraint.target = armature
-        constraint.subtarget = bone_name
-        constraint.use_x = True
-        constraint.use_y = True
-        constraint.use_z = False
+        constraint.subtarget = pelvis_bone.name
+        constraint.head_tail = 0.0
 
-        bpy.context.view_layer.update()
+        constraint.influence = 1.0
+
+        for frame in range(self.start_frame, self.end_frame + 1):
+            bpy.context.scene.frame_set(frame)
+            empty_obj.location = pelvis_bone.matrix.translation
+            empty_obj.keyframe_insert(data_path="location", index=-1)
+
+        text_obj.location.z = -0.6
 
     def convert_bvh_to_glb(self, output_name):
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
-        bpy.ops.wm.obj_import(filepath="Basketball_court.obj")
+        bpy.ops.wm.obj_import(filepath="court.obj")
 
         for file in os.listdir(self.dir):
             if not file.endswith(".bvh"):
@@ -149,6 +153,13 @@ class bvh_to_glb:
                 continue
             bpy.context.view_layer.objects.active = armature
 
+            action = armature.animation_data.action
+            if not action:
+                print("Error getting frame range. Try manually inputting it")
+                exit(1)
+            self.start_frame = int(action.frame_range[0])
+            self.end_frame = int(action.frame_range[1])
+
             for bone in armature.pose.bones:
                 bone.bone.use_local_location = True
                 bone.bone.use_relative_parent = True
@@ -156,9 +167,7 @@ class bvh_to_glb:
                 if bone.bone.parent:
                     self.create_cone_arm(bone.bone, armature)
                 if bone.name == "pelvis":
-                    self.display_name(
-                        armature,
-                    )
+                    self.display_name(armature)
 
         bpy.ops.object.select_all(action="SELECT")
 
