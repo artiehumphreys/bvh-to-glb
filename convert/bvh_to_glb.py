@@ -132,9 +132,14 @@ class bvh_to_glb:
         for frame in range(self.start_frame, self.end_frame + 1):
             bpy.context.scene.frame_set(frame)
             empty_obj.location = pelvis_bone.matrix.translation
-            text_obj.location.x = 1
-            text_obj.location.z = -0.5
             empty_obj.keyframe_insert(data_path="location", index=-1)
+
+            text_world_matrix = text_obj.matrix_world.copy()
+            text_world_matrix.translation.z = 0.1
+            text_obj.matrix_world = text_world_matrix
+            text_obj.keyframe_insert(data_path="location", index=2)
+
+        text_obj.location.x = 1
 
     def convert_bvh_to_glb(self, output_name):
         bpy.ops.wm.read_factory_settings(use_empty=True)
