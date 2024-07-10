@@ -118,6 +118,10 @@ class bvh_to_glb:
         text_obj.data.body = player_name
 
         text_obj.data.align_x = "CENTER"
+        text_obj.data.materials.clear()
+        material = bpy.data.materials.new(name="font color")
+        material.diffuse_color = (0, 0, 0, 1)
+        text_obj.data.materials.append(material)
 
         text_obj.parent = empty_obj
 
