@@ -162,9 +162,13 @@ class bvh_to_glb:
 
     def display_ball(self):
         bpy.ops.object.select_all(action="DESELECT")
-        bpy.ops.mesh.primitive_uv_sphere_add(radius=29.5 / 200, location=(0, 0, 0))
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.124, location=(0, 0, 0))
         ball_obj = bpy.context.active_object
         ball_obj.name = "ball"
+        ball_obj.data.materials.clear()
+        material = bpy.data.materials.new(name="ball color")
+        material.diffuse_color = (1, 0.5, 0.1, 1)
+        ball_obj.data.materials.append(material)
 
         for frame in range(self.start_frame, self.end_frame):
             bpy.context.scene.frame_set(frame)
