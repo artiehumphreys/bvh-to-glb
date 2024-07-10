@@ -3,7 +3,7 @@ const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas);
 
 const createScene = () => {
-    const fileName = "../output.glb";
+    const fileName = "Pose3D_BKN_UTA.glb";
     const scene = new BABYLON.Scene(engine);
 
     const camera = new BABYLON.ArcRotateCamera("camera1", -Math.PI / 2, Math.PI / 2, 2, new BABYLON.Vector3(0, 1, 0), scene);

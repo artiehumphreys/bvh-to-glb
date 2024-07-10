@@ -3,10 +3,11 @@ import os
 import mathutils  # type: ignore
 from pathlib import Path
 import csv
+import sys
 
 
 class bvh_to_glb:
-    def __init__(self, dir="output_BVH", output_path="babylon_viewer/output"):
+    def __init__(self, dir="output_BVH", output_path="final_files"):
         self.output_path: str = output_path
         self.filename: str = ""
         self.player_ids: dict[int, str] = {}
@@ -37,7 +38,7 @@ class bvh_to_glb:
             self.player_ids[int(split[2])] = ""
         self.read_player_csv()
 
-    def read_player_csv(self, file=r"players 1.csv"):
+    def read_player_csv(self, file=r"data/players 1.csv"):
         with open(file, mode="r") as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
@@ -46,7 +47,7 @@ class bvh_to_glb:
                     continue
                 self.player_ids[player_id] = row["player_name"]
 
-    def read_ball_csv(self, file="Ball_Track.csv"):
+    def read_ball_csv(self, file="data/Ball_Track.csv"):
         frame = 1
         with open(file, mode="r") as csvfile:
             reader = csv.DictReader(csvfile)
@@ -187,7 +188,7 @@ class bvh_to_glb:
         display_ball = False
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
-        bpy.ops.wm.obj_import(filepath="court.obj")
+        bpy.ops.wm.obj_import(filepath="rendering/court.obj")
 
         for file in os.listdir(self.dir):
             if not file.endswith(".bvh"):
@@ -225,9 +226,12 @@ class bvh_to_glb:
 
         bpy.ops.object.select_all(action="SELECT")
 
+        for team in self.teams.keys():
+            output_name += f"_{team}"
+
         bpy.ops.export_scene.gltf(filepath=output_name, export_format="GLB")
 
 
 if __name__ == "__main__":
-    converter = bvh_to_glb()
-    converter.convert_bvh_to_glb(converter.output_path)
+    converter = bvh_to_glb(dir=sys.argv[1], output_path=sys.argv[2])
+    converter.convert_bvh_to_glb(converter.output_path + "/Pose3D")
