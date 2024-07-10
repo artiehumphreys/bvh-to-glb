@@ -118,15 +118,16 @@ class bvh_to_glb:
         self.assign_team_color(cone)
 
     def display_name(self, armature):
+        z_constant = 0.1
         player_name = self.get_player_name()
         bpy.ops.object.select_all(action="DESELECT")
 
-        bpy.ops.object.empty_add(type="PLAIN_AXES", location=(0, 0, 0.1))
+        bpy.ops.object.empty_add(type="PLAIN_AXES", location=(0, 0, z_constant))
         empty_obj = bpy.context.active_object
         empty_obj.name = "empty"
 
         bpy.ops.object.text_add(
-            location=(0, 0, 0.1), radius=0.6, rotation=(0, 0, 1.5708)
+            location=(0, 0, z_constant), radius=0.6, rotation=(0, 0, 1.5708)
         )
         text_obj = bpy.context.active_object
         text_obj.name = "text"
@@ -154,11 +155,20 @@ class bvh_to_glb:
             empty_obj.keyframe_insert(data_path="location", index=-1)
 
             text_world_matrix = text_obj.matrix_world.copy()
-            text_world_matrix.translation.z = 0.1
+            text_world_matrix.translation.z = z_constant
             text_obj.matrix_world = text_world_matrix
-            text_obj.keyframe_insert(data_path="location", index=2)
+            pelvis_world_x = pelvis_bone.matrix.translation.x
+            if pelvis_world_x != 0:
+                text_obj.location.x = -1 * pelvis_world_x / abs(pelvis_world_x)
+                text_obj.rotation_euler[2] = -1.5708 * (
+                    pelvis_world_x / abs(pelvis_world_x)
+                )
+            else:
+                text_obj.location.x = 1
+                text_obj.rotation_euler[2] = 1.5708
 
-        text_obj.location.x = 1
+            text_obj.keyframe_insert(data_path="location", index=-1)
+            text_obj.keyframe_insert(data_path="rotation_euler", index=2)
 
     def display_ball(self):
         bpy.ops.object.select_all(action="DESELECT")
@@ -167,7 +177,7 @@ class bvh_to_glb:
         ball_obj.name = "ball"
         ball_obj.data.materials.clear()
         material = bpy.data.materials.new(name="ball color")
-        material.diffuse_color = (1, 0.5, 0.1, 1)
+        material.diffuse_color = (1, 0.3, 0.1, 1)
         ball_obj.data.materials.append(material)
 
         for frame in range(self.start_frame, self.end_frame):
