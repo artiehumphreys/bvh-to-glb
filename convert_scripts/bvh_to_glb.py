@@ -205,7 +205,12 @@ class bvh_to_glb:
         display_ball: bool = False
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
-        bpy.ops.wm.obj_import(filepath="rendering/court.obj")
+        try:
+            bpy.ops.wm.obj_import(filepath="rendering/court.obj")
+        except:
+            print(
+                "If you would like to include a field/court in the animation, ensure that the path is correct. 'rendering/court.obj'"
+            )
         if not os.path.exists(self.dir):
             print(
                 "Please ensure that the directory that contains all of the .bvh files is correctly cited."
