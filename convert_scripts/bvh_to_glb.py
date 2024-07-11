@@ -62,15 +62,20 @@ class bvh_to_glb:
 
     def read_ball_csv(self, file) -> None:
         frame: int = 1
-        with open(file, mode="r") as csvfile:
-            reader: csv.DictReader = csv.DictReader(csvfile)
-            for row in reader:
-                self.ball_track[frame] = (
-                    float(row["X"]),
-                    float(row["Y"]),
-                    float(row["Z"]),
-                )
-                frame += 1
+        try:
+            with open(file, mode="r") as csvfile:
+                reader: csv.DictReader = csv.DictReader(csvfile)
+                for row in reader:
+                    self.ball_track[frame] = (
+                        float(row["X"]),
+                        float(row["Y"]),
+                        float(row["Z"]),
+                    )
+                    frame += 1
+        except FileNotFoundError:
+            print(
+                f"File {file} does not exist. Please check the file path and try again. If you don't have a file with ball tracks (for sports use cases), ignore this."
+            )
 
     def assign_team_color(self, shape: bpy.types.Object) -> None:
         team: str = self.get_team()
