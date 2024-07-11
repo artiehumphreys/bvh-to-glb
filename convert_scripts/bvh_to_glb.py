@@ -206,6 +206,16 @@ class bvh_to_glb:
             ball_obj.location = self.ball_track[frame]
             ball_obj.keyframe_insert(data_path="location", index=-1)
 
+    def set_camera_to_follow_head(self, armature):
+        bpy.ops.object.camera_add()
+        camera = bpy.context.object
+        head_bone = armature.pose.bones.get("baseHead")
+        if head_bone:
+            constraint = camera.constraints.new(type="CHILD_OF")
+            constraint.target = armature
+            constraint.subtarget = head_bone.name
+            camera.location = (0, -10, 5)
+
     def convert_bvh_to_glb(self, output_name: str) -> None:
         display_ball: bool = False
         bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -245,6 +255,7 @@ class bvh_to_glb:
 
             if not display_ball:
                 self.display_ball()
+                self.set_camera_to_follow_head(armature)
                 display_ball = True
 
             for bone in armature.pose.bones:
