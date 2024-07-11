@@ -2,6 +2,8 @@ const canvas = document.getElementById("renderCanvas");
 
 const engine = new BABYLON.Engine(canvas);
 
+let num = 0;
+
 const createScene = () => {
     const fileName = "Pose3D_BKN_UTA.glb";
     const scene = new BABYLON.Scene(engine);
@@ -9,21 +11,8 @@ const createScene = () => {
     let camera = null;
 
     BABYLON.SceneLoader.Append("", fileName, scene, function(scene) {
-        console.log("Model loaded successfully.");
-
-        let headNode = null;
-        scene.meshes.forEach(mesh => {
-            if (mesh.name.toLowerCase().includes("head")) {
-                headNode = mesh;
-            }
-        });
-        if (!headNode) {
-            console.error("Head node not found in the scene.");
-            return;
-        }
-        console.log(`Head node found: ${headNode.name}`);
-
-        camera = new BABYLON.TargetCamera("camera1", new BABYLON.Vector3(0, 1, 5), scene);
+        let headNode = findHead(scene, num);
+        camera = new BABYLON.TargetCamera("camera1", new BABYLON.Vector3(0, 1, 3), scene);
         camera.parent = headNode;
         camera.setTarget(headNode.getAbsolutePosition());
         camera.attachControl(canvas, true);
@@ -41,5 +30,30 @@ const createScene = () => {
 
     return scene;
 };
+
+function findHead(scene){
+    let headNodes = [];
+    let headNode = null;
+    console.log(scene.meshes)
+    scene.meshes.forEach(mesh => {
+            if (mesh.name.toLowerCase().includes("head")) {
+                headNode = mesh
+                headNodes.push(headNode);
+            }
+        });
+        if (!headNode) {
+            console.error("Head node not found in the scene.");
+            return;
+        }
+    num ++;
+    return headNodes[num-1]
+}
+
+window.addEventListener("keydown", function(e){
+    if (e.code === "Space"){
+        num ++;
+        createScene();
+    }
+});
 
 const scene = createScene();
