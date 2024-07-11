@@ -47,13 +47,18 @@ class bvh_to_glb:
         self.read_player_csv()
 
     def read_player_csv(self) -> None:
-        with open(self.player_csv, mode="r") as csvfile:
-            reader: csv.DictReader = csv.DictReader(csvfile)
-            for row in reader:
-                player_id: int = int(row["player_id"])
-                if player_id not in self.player_ids:
-                    continue
-                self.player_ids[player_id] = row["player_name"]
+        try:
+            with open(self.player_csv, mode="r") as csvfile:
+                reader: csv.DictReader = csv.DictReader(csvfile)
+                for row in reader:
+                    player_id: int = int(row["player_id"])
+                    if player_id not in self.player_ids:
+                        continue
+                    self.player_ids[player_id] = row["player_name"]
+        except FileNotFoundError:
+            print(
+                f"File {self.player_csv} does not exist. Please check the file path and try again. If you don't have a file with player id mappings, ignore this."
+            )
 
     def read_ball_csv(self, file) -> None:
         frame: int = 1
@@ -204,6 +209,7 @@ class bvh_to_glb:
 
         for file in os.listdir(self.dir):
             if not file.endswith(".bvh"):
+                print(f"Ignoring file: {file}. It is not a .bvh file.")
                 continue
             self.filename = Path(file).stem
 
