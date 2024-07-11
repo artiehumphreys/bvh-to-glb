@@ -15,8 +15,9 @@ $p -m pip install --upgrade pip &>/dev/null
 $p -m pip install -r requirements.txt
 bvh_dir="output_BVH"
 output_dir="babylon_viewer"
-$p convert_scripts/bvh_to_glb.py $bvh_dir $output_dir
-sleep 1
+players_csv="data/players 1.csv"
+ball_csv="data/Ball_Track.csv"
+$p convert_scripts/bvh_to_glb.py $bvh_dir $output_dir $players_csv $ball_csv 2>/dev/null
 cd babylon_viewer
 id=$(chrome-cli list links | grep 'localhost:5500' | awk -F'[:\\]]' '{print $2}' | awk '{print $1}')
 p="../venv/bin/python"
