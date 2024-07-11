@@ -206,7 +206,11 @@ class bvh_to_glb:
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
         bpy.ops.wm.obj_import(filepath="rendering/court.obj")
-
+        if not os.path.exists(self.dir):
+            print(
+                "Please ensure that the directory that contains all of the .bvh files is correctly cited."
+            )
+            exit(1)
         for file in os.listdir(self.dir):
             if not file.endswith(".bvh"):
                 print(f"Ignoring file: {file}. It is not a .bvh file.")
