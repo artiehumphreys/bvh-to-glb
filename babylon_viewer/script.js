@@ -12,8 +12,9 @@ const createScene = () => {
 
     BABYLON.SceneLoader.Append("", fileName, scene, function(scene) {
         let headNode = findHead(scene, num);
-        camera = new BABYLON.TargetCamera("camera1", new BABYLON.Vector3(0, 1, 3), scene);
+        camera = new BABYLON.TargetCamera("camera1", new BABYLON.Vector3(0, 1, -3), scene);
         camera.parent = headNode;
+        camera.rotation = new BABYLON.Vector3(0, 0, 0);
         camera.setTarget(headNode.getAbsolutePosition());
         camera.attachControl(canvas, true);
         const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), scene);
@@ -22,7 +23,7 @@ const createScene = () => {
             group.start(true);
         });
 
-        engine.runRenderLoop(() => {
+        engine.runRenderLoop(() => { 
             scene.render();
         });
 
