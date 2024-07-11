@@ -7,7 +7,14 @@ import sys
 
 
 class bvh_to_glb:
-    def __init__(self, dir="output_BVH", output_path="final_files"):
+
+    def __init__(
+        self,
+        dir="output_BVH",
+        output_path="final_files",
+        player_csv=r"data/players 1.csv",
+        ball_csv="data/Ball_Track.csv",
+    ):
         self.output_path: str = output_path
         self.filename: str = ""
         self.player_ids: dict[int, str] = {}
@@ -16,8 +23,9 @@ class bvh_to_glb:
         self.scale: float = 1.25
         self.dir = dir
         self.start_frame, self.end_frame = 0, 0
+        self.player_csv = player_csv
         self.process_players(self.dir)
-        self.read_ball_csv()
+        self.read_ball_csv(ball_csv)
 
     def get_team(self):
         split = self.filename.split("_")
@@ -38,8 +46,8 @@ class bvh_to_glb:
             self.player_ids[int(split[2])] = ""
         self.read_player_csv()
 
-    def read_player_csv(self, file=r"data/players 1.csv"):
-        with open(file, mode="r") as csvfile:
+    def read_player_csv(self):
+        with open(self.player_csv, mode="r") as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 player_id = int(row["player_id"])
@@ -47,7 +55,7 @@ class bvh_to_glb:
                     continue
                 self.player_ids[player_id] = row["player_name"]
 
-    def read_ball_csv(self, file="data/Ball_Track.csv"):
+    def read_ball_csv(self, file):
         frame = 1
         with open(file, mode="r") as csvfile:
             reader = csv.DictReader(csvfile)
@@ -233,5 +241,10 @@ class bvh_to_glb:
 
 
 if __name__ == "__main__":
-    converter = bvh_to_glb(dir=sys.argv[1], output_path=sys.argv[2])
+    converter = bvh_to_glb(
+        dir=sys.argv[1],
+        output_path=sys.argv[2],
+        player_csv=sys.argv[3],
+        ball_csv=sys.argv[4],
+    )
     converter.convert_bvh_to_glb(converter.output_path + "/Pose3D")
