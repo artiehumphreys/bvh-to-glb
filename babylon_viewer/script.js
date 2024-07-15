@@ -6,6 +6,8 @@ let num = 0;
 
 let isPaused = false;
 
+let frame = 0;
+
 const createScene = () => {
     const fileName = "Pose3D_BKN_UTA.glb";
     const scene = new BABYLON.Scene(engine);
@@ -81,9 +83,28 @@ window.addEventListener("keyup", function(e) {
             }
         });
         scene.animationGroups.forEach((group) => {
-            group.play();
+            group.play(true);
         });
     }
 });
+const slider = document.getElementById("slider");
+slider.onchange = function() {
+    isPaused = false;
+    scene.animationGroups.forEach((group) => {
+        group.play();
+    });
+}
+slider.oninput = function() {
+    isPaused = true;
+    scene.animationGroups.forEach((group) => {
+        group.pause();
+    });
+    maxFrame = scene.animationGroups[0].to;
+    frame = Math.floor(this.value / 100 * maxFrame); 
+    scene.animationGroups.forEach((group) => {
+        group.goToFrame(frame);
+    });
+}
+
 
 const scene = createScene();
