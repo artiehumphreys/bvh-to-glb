@@ -18,5 +18,6 @@ You can edit the provided shell script to ensure it points to the correct direct
 To include a backdrop or floor for your animation, create an object and save it as `rendering/court.obj` within the working directory. This object will be imported and used as the backdrop or floor in your animations.
 
 ## Video Demo
-https://github.com/artiehumphreys/bvh-to-glb/assets/81706705/6a564a83-8904-431f-8013-a78278f8d3e3
+https://github.com/user-attachments/assets/0dc799c0-190a-4536-bc96-f1d7aeb63a03
+
 
