@@ -12,9 +12,15 @@ const createScene = () => {
 
     BABYLON.SceneLoader.Append("", fileName, scene, function(scene) {
         let headNode = findHead(scene, num);
-        camera = new BABYLON.TargetCamera("camera1", new BABYLON.Vector3(0, 0, -3), scene);
-        camera.parent = headNode;
-        camera.setTarget(headNode.getAbsolutePosition());
+        if (headNode === null){
+            camera = new BABYLON.ArcRotateCamera("camera1", -Math.PI / 2, Math.PI / 2, 2, new BABYLON.Vector3(0, 1, 0), scene);
+            scene.createDefaultCameraOrLight(true, true, true);
+
+        } else {
+            camera = new BABYLON.TargetCamera("camera1", new BABYLON.Vector3(0, 0, 3), scene);
+            camera.parent = headNode;
+            camera.setTarget(headNode.getAbsolutePosition());
+        }  
         camera.attachControl(canvas, true);
         const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), scene);
 
@@ -34,6 +40,7 @@ const createScene = () => {
 function findHead(scene){
     let headNodes = [];
     let headNode = null;
+    headNodes.push(headNode);
     scene.meshes.forEach(mesh => {
             if (mesh.name.toLowerCase().includes("head")) {
                 headNode = mesh
