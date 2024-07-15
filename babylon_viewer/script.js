@@ -8,6 +8,11 @@ let isPaused = false;
 
 let frame = 0;
 
+let currentFrame = 0;
+let maxFrame = 0;
+
+const slider = document.getElementById("slider");
+
 const createScene = () => {
     const fileName = "Pose3D_BKN_UTA.glb";
     const scene = new BABYLON.Scene(engine);
@@ -34,8 +39,11 @@ const createScene = () => {
             group.start(true);
         });
 
+        maxFrame = scene.animationGroups[0].to;
+
         engine.runRenderLoop(() => { 
             scene.render();
+            updateSlider();
         });
 
     });
@@ -43,30 +51,40 @@ const createScene = () => {
     return scene;
 };
 
-function findHead(scene){
-    cameraHeads = scene.meshes.filter(node => node.name.includes("sphere_baseHead"));
+function updateSlider(){
+    if (scene.animationGroups.length > 0 && scene.animationGroups[0].animatables.length > 0) {
+        maxFrame = scene.animationGroups[0].to;
+        currentFrame = scene.animationGroups[0].animatables[0].masterFrame;
+        let sliderVal = (currentFrame / maxFrame) * 100;
+        slider.value = sliderVal;
+    }
+}
+
+function findHead(scene) {
+    const cameraHeads = scene.meshes.filter(node => node.name.includes("sphere_baseHead"));
     cameraHeads.unshift(null);
     if (cameraHeads.length === 1) {
         console.error("Head node not found in the scene.");
-        return;
+        return null;
     }
-    num ++;
-    if (num >= cameraHeads.length){
+    num++;
+    if (num >= cameraHeads.length) {
         num = 1;
     }
-    return cameraHeads[num-1]
+    return cameraHeads[num - 1];
 }
 
-function displayName(name){
-    nametag = document.getElementById("nametag");
+function displayName(name) {
+    const nametag = document.getElementById("nametag");
     nametag.innerHTML = name;
 }
 
-window.addEventListener("keydown", function(e){
-    if (e.code === "KeyC"){
-        createScene();
+window.addEventListener("keydown", function(e) {
+    if (e.code === "KeyC") {
+        currentFrame = scene.animationGroups[0].animatables[0]?.masterFrame;
+        scene = createScene();
     }
-    if (e.code === "Space"){
+    if (e.code === "Space") {
         isPaused = true;
         scene.animationGroups.forEach((group) => {
             group.pause();
@@ -77,34 +95,29 @@ window.addEventListener("keydown", function(e){
 window.addEventListener("keyup", function(e) {
     if (e.code === "Space") {
         isPaused = false;
-        engine.runRenderLoop(() => {
-            if (!isPaused){
-                scene.render();
-            }
-        });
         scene.animationGroups.forEach((group) => {
-            group.play(true);
+            group.play();
         });
     }
 });
-const slider = document.getElementById("slider");
+
 slider.onchange = function() {
     isPaused = false;
     scene.animationGroups.forEach((group) => {
         group.play();
     });
-}
+};
+
 slider.oninput = function() {
     isPaused = true;
     scene.animationGroups.forEach((group) => {
         group.pause();
     });
-    maxFrame = scene.animationGroups[0].to;
-    frame = Math.floor(this.value / 100 * maxFrame); 
+    const maxFrame = scene.animationGroups[0].to;
+    frame = Math.floor((this.value / 100) * maxFrame);
     scene.animationGroups.forEach((group) => {
         group.goToFrame(frame);
     });
-}
+};
 
-
-const scene = createScene();
+let scene = createScene();
