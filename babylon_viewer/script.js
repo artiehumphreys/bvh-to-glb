@@ -12,6 +12,8 @@ const createScene = () => {
 
     BABYLON.SceneLoader.Append("", fileName, scene, function(scene) {
         let headNode = findHead(scene, num);
+        let name = headNode?.name?.split('_')[2] ?? "Default";
+        displayName(name);
         if (headNode === null){
             camera = new BABYLON.ArcRotateCamera("camera1", -Math.PI / 2, Math.PI / 2, 2, new BABYLON.Vector3(0, 1, 0), scene);
             scene.createDefaultCameraOrLight(true, true, true);
@@ -39,7 +41,6 @@ const createScene = () => {
 
 function findHead(scene){
     cameraHeads = scene.meshes.filter(node => node.name.includes("sphere_baseHead"));
-    console.log(cameraHeads);
     cameraHeads.unshift(null);
     if (cameraHeads.length === 1) {
         console.error("Head node not found in the scene.");
@@ -50,6 +51,11 @@ function findHead(scene){
         num = 1;
     }
     return cameraHeads[num-1]
+}
+
+function displayName(name){
+    nametag = document.getElementById("nametag");
+    nametag.innerHTML = name;
 }
 
 window.addEventListener("keydown", function(e){

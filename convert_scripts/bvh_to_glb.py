@@ -98,7 +98,7 @@ class bvh_to_glb:
                 radius=bone.head_radius, location=bone.head_local
             )
         sphere = bpy.context.object
-        sphere.name = f"sphere_{bone.name}_{self.filename}"
+        sphere.name = f"sphere_{bone.name}_{self.get_player_name()}"
         if bone.name == "baseHead":
             head_height = 0.15
             sphere.location += mathutils.Vector((0, 0, head_height))
