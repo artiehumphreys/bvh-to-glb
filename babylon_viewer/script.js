@@ -17,7 +17,7 @@ const createScene = () => {
             scene.createDefaultCameraOrLight(true, true, true);
 
         } else {
-            camera = new BABYLON.TargetCamera("camera1", new BABYLON.Vector3(0, 0, 3), scene);
+            camera = new BABYLON.TargetCamera("camera1", new BABYLON.Vector3(0, 0, -3), scene);
             camera.parent = headNode;
             camera.setTarget(headNode.getAbsolutePosition());
         }  
@@ -38,29 +38,22 @@ const createScene = () => {
 };
 
 function findHead(scene){
-    let headNodes = [];
-    let headNode = null;
-    headNodes.push(headNode);
-    scene.meshes.forEach(mesh => {
-            if (mesh.name.toLowerCase().includes("head")) {
-                headNode = mesh
-                headNodes.push(headNode);
-            }
-        });
-        if (!headNode) {
-            console.error("Head node not found in the scene.");
-            return;
-        }
+    cameraHeads = scene.meshes.filter(node => node.name.includes("sphere_baseHead"));
+    console.log(cameraHeads);
+    cameraHeads.unshift(null);
+    if (cameraHeads.length === 1) {
+        console.error("Head node not found in the scene.");
+        return;
+    }
     num ++;
-    if (num >= headNodes.length){
+    if (num >= cameraHeads.length){
         num = 1;
     }
-    return headNodes[num-1]
+    return cameraHeads[num-1]
 }
 
 window.addEventListener("keydown", function(e){
     if (e.code === "Space"){
-        num ++;
         createScene();
     }
 });
