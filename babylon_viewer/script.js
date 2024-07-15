@@ -79,40 +79,37 @@ function displayName(name) {
     nametag.innerHTML = name;
 }
 
+function play(){
+    scene.animationGroups.forEach((group) => {
+        group.play();
+    });
+}
+
+function pause(){
+    scene.animationGroups.forEach((group) => {
+        group.pause();
+    });
+}
+
 window.addEventListener("keydown", function(e) {
     if (e.code === "KeyC") {
         currentFrame = scene.animationGroups[0].animatables[0]?.masterFrame;
         scene = createScene();
     }
     if (e.code === "Space") {
-        isPaused = true;
-        scene.animationGroups.forEach((group) => {
-            group.pause();
-        });
-    }
-});
-
-window.addEventListener("keyup", function(e) {
-    if (e.code === "Space") {
-        isPaused = false;
-        scene.animationGroups.forEach((group) => {
-            group.play();
-        });
+        isPaused = !isPaused;
+        isPaused ? pause() : play();
     }
 });
 
 slider.onchange = function() {
     isPaused = false;
-    scene.animationGroups.forEach((group) => {
-        group.play();
-    });
+    play();
 };
 
 slider.oninput = function() {
     isPaused = true;
-    scene.animationGroups.forEach((group) => {
-        group.pause();
-    });
+    pause();
     const maxFrame = scene.animationGroups[0].to;
     frame = Math.floor((this.value / 100) * maxFrame);
     scene.animationGroups.forEach((group) => {
