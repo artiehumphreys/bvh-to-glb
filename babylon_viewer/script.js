@@ -4,6 +4,8 @@ const engine = new BABYLON.Engine(canvas);
 
 let num = 0;
 
+let isPaused = false;
+
 const createScene = () => {
     const fileName = "Pose3D_BKN_UTA.glb";
     const scene = new BABYLON.Scene(engine);
@@ -59,8 +61,28 @@ function displayName(name){
 }
 
 window.addEventListener("keydown", function(e){
-    if (e.code === "Space"){
+    if (e.code === "KeyC"){
         createScene();
+    }
+    if (e.code === "Space"){
+        isPaused = true;
+        scene.animationGroups.forEach((group) => {
+            group.pause();
+        });
+    }
+});
+
+window.addEventListener("keyup", function(e) {
+    if (e.code === "Space") {
+        isPaused = false;
+        engine.runRenderLoop(() => {
+            if (!isPaused){
+                scene.render();
+            }
+        });
+        scene.animationGroups.forEach((group) => {
+            group.play();
+        });
     }
 });
 

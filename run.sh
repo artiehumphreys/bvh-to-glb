@@ -7,7 +7,7 @@ cleanup() {
 trap cleanup INT
 cd $(pwd) || exit
 brew list python &>/dev/null || brew install python
-brew list chrome-cli &>/dev/null || brew install chrome-cli
+# brew list chrome-cli &>/dev/null || brew install chrome-cli
 python -m venv venv
 source venv/bin/activate || { echo "Failed to activate virtual environment"; exit 1; }
 p="venv/bin/python"
@@ -17,19 +17,19 @@ bvh_dir="output_BVH"
 output_dir="babylon_viewer"
 players_csv="data/players 1.csv"
 ball_csv="data/Ball_Track.csv"
-$p convert_scripts/bvh_to_glb.py $bvh_dir $output_dir $players_csv $ball_csv 2>/dev/null
+# $p convert_scripts/bvh_to_glb.py $bvh_dir $output_dir $players_csv $ball_csv 2>/dev/null
 cd babylon_viewer
-id=$(chrome-cli list links | grep 'localhost:5500' | awk -F'[:\\]]' '{print $2}' | awk '{print $1}')
+# id=$(chrome-cli list links | grep 'localhost:5500' | awk -F'[:\\]]' '{print $2}' | awk '{print $1}')
 p="../venv/bin/python"
 echo "Starting HTTP server..."
 $p -m http.server 5500 &
 HTTP_SERVER_PID=$!
-sleep 0.5
-if [ -z "$id" ]; then
-    open http://localhost:5500/
-else
-    chrome-cli activate -t $id
-    chrome-cli reload -t $id
-fi
+# sleep 0.5
+# if [ -z "$id" ]; then
+#     open http://localhost:5500/
+# else
+#     chrome-cli activate -t $id
+#     chrome-cli reload -t $id
+# fi
 wait $HTTP_SERVER_PID
 cd ..
