@@ -4,7 +4,15 @@
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylon.glTF2FileLoader.min.js"></script>
 </head>
-<body style = "width: 100vw; height: 100vh; margin: 0;">
+<span style="z-index: 10000; position: absolute; top: 3vh; left: 3vw; color:white;">Press the "c" key to switch between camera views.</span>
+<div class="container" style="position: absolute; top: 8vh; left: 3vw;">
+    <span style="z-index: 10000; display: inline-block; color:white;">Currently Following: </span>
+    <span style="z-index: 10000; display: inline-block; color:white;" id="nametag"></span>
+</div>
+<div class="slidecontainer">
+    <input type="range" min="0" max="100" value="0" id="slider" style="position: absolute; bottom: 5vh; left: 50vw; transform: translate(-50%, -50%); width: 25vw;">
+</div>
+<body style = "width: 100vw; height: 100vh; margin: 0; overflow-y: hidden;">
     <canvas id="renderCanvas" style = "width: 100vw; height: 100vh;"></canvas>
     <script src="script.js"></script>
 </body>

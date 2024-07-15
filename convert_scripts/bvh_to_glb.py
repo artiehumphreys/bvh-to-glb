@@ -98,7 +98,7 @@ class bvh_to_glb:
                 radius=bone.head_radius, location=bone.head_local
             )
         sphere = bpy.context.object
-        sphere.name = f"sphere_{bone.name}_{self.filename}"
+        sphere.name = f"sphere_{bone.name}_{self.get_player_name()}"
         if bone.name == "baseHead":
             head_height = 0.15
             sphere.location += mathutils.Vector((0, 0, head_height))
@@ -139,8 +139,9 @@ class bvh_to_glb:
         cone.parent_bone = parent.name
         self.assign_team_color(cone)
 
-    def display_name(self, armature: bpy.types.Object) -> None:
-        z_constant: float = 0.1
+    def create_name_boxes(
+        self, armature: bpy.types.Object, z_constant: float = 0.1
+    ) -> None:
         player_name: str = self.get_player_name()
         bpy.ops.object.select_all(action="DESELECT")
 
@@ -163,23 +164,23 @@ class bvh_to_glb:
 
         text_obj.parent = empty_obj
 
-        pelvis_bone: bpy.types.Bone = armature.pose.bones["pelvis"]
+        pelvis: bpy.types.Bone = armature.pose.bones["pelvis"]
         constraint: bpy.types.Constraint = empty_obj.constraints.new("COPY_LOCATION")
         constraint.target = armature
-        constraint.subtarget = pelvis_bone.name
+        constraint.subtarget = pelvis.name
         constraint.head_tail = 0.0
 
         constraint.influence = 1.0
 
         for frame in range(self.start_frame, self.end_frame + 1):
             bpy.context.scene.frame_set(frame)
-            empty_obj.location = pelvis_bone.matrix.translation
+            empty_obj.location = pelvis.matrix.translation
             empty_obj.keyframe_insert(data_path="location", index=-1)
 
             text_world_matrix: mathutils.Matrix = text_obj.matrix_world.copy()
             text_world_matrix.translation.z = z_constant
             text_obj.matrix_world = text_world_matrix
-            pelvis_world_x: float = pelvis_bone.matrix.translation.x
+            pelvis_world_x: float = pelvis.matrix.translation.x
             if pelvis_world_x != 0:
                 text_obj.location.x = -1 * pelvis_world_x / abs(pelvis_world_x)
                 text_obj.rotation_euler[2] = -1.5708 * (
@@ -254,7 +255,7 @@ class bvh_to_glb:
                 if bone.bone.parent:
                     self.create_cone_arm(bone.bone, armature)
                 if bone.name == "pelvis":
-                    self.display_name(armature)
+                    self.create_name_boxes(armature)
 
         bpy.ops.object.select_all(action="SELECT")
 
