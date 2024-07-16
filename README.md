@@ -2,7 +2,7 @@
 Transform your BVH files into interactive animations effortlessly with BVH-to-GLB. This tool uses the Blender API to convert .bvh files into .glb format, making it easy to integrate motion capture data into 3D environments. Using this repository is incredibly simple:
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/artiehumphreys/vicon-sync
+git clone https://github.com/artiehumphreys/bvh-to-glb
 cd bvh-to-glb/
 ```
 ### 2. Run the shell script
