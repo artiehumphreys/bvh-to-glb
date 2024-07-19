@@ -14,7 +14,7 @@ class bvh_to_glb:
         output_path: str = "final_files",
         player_csv: str = r"data/players 1.csv",
         ball_csv: str = "data/Ball_Track.csv",
-        field_obj: str = "rendering/court.obj"
+        field_obj: str = "rendering/court.obj",
     ) -> None:
         self.output_path: str = output_path
         self.filename: str = ""
@@ -30,14 +30,17 @@ class bvh_to_glb:
         self.read_ball_csv(ball_csv)
 
     def get_team(self) -> str:
+        """Getter method for fetching player team."""
         split: list[str] = self.filename.split("_")
         return split[1]
 
     def get_player_name(self) -> str:
+        """Getter method for fetching player name based on unique id. This feature is not required."""
         split: list[str] = self.filename.split("_")
         return self.player_ids[int(split[2])]
 
     def process_players(self, directory: str) -> None:
+        """Initalize dictionary for player name mappings based on file name."""
         for file in os.listdir(directory):
             if not file.endswith(".bvh"):
                 continue
@@ -49,6 +52,7 @@ class bvh_to_glb:
         self.read_player_csv()
 
     def read_player_csv(self) -> None:
+        """Read the player id and name from a .csv file. This is solely for the nametag feature and is not required. The file can be specified in run.sh."""
         try:
             with open(self.player_csv, mode="r") as csvfile:
                 reader: csv.DictReader = csv.DictReader(csvfile)
@@ -63,6 +67,7 @@ class bvh_to_glb:
             )
 
     def read_ball_csv(self, file) -> None:
+        """Read the ball track from a .csv file. The file can be specified in run.sh."""
         frame: int = 1
         try:
             with open(file, mode="r") as csvfile:
@@ -80,6 +85,7 @@ class bvh_to_glb:
             )
 
     def assign_team_color(self, shape: bpy.types.Object) -> None:
+        """Based on number assigned to team of which a player is on (either a 0 or 1), color the bone."""
         team: str = self.get_team()
         color: float = self.teams[team]
         mat: bpy.types.Material = bpy.data.materials.new(name=f"Material_{team}")
@@ -89,6 +95,7 @@ class bvh_to_glb:
     def create_sphere_at_bone(
         self, bone: bpy.types.Bone, armature: bpy.types.Object
     ) -> None:
+        """Create the bone object. If the bone is a hand, elongate it to resemble humans."""
         if bone.name == "lWrist" or bone.name == "rWrist":
             bpy.ops.mesh.primitive_uv_sphere_add(
                 radius=bone.head_radius / self.scale, location=bone.head_local
@@ -113,7 +120,10 @@ class bvh_to_glb:
         sphere.parent_bone = bone.name
         self.assign_team_color(sphere)
 
-    def create_cone_arm(self, bone: bpy.types.Bone, armature: bpy.types.Object) -> None:
+    def create_bone_connector(
+        self, bone: bpy.types.Bone, armature: bpy.types.Object
+    ) -> None:
+        """Create the bone connectors (arms, legs, etc.) for eahc of the bones."""
         parent: bpy.types.Bone = bone.parent
 
         cone_vector: mathutils.Vector = bone.head_local - parent.head_local
@@ -144,6 +154,7 @@ class bvh_to_glb:
     def create_name_boxes(
         self, armature: bpy.types.Object, z_constant: float = 0.1
     ) -> None:
+        """Create text boxes where the name tags will go."""
         player_name: str = self.get_player_name()
         bpy.ops.object.select_all(action="DESELECT")
 
@@ -195,6 +206,7 @@ class bvh_to_glb:
             text_obj.keyframe_insert(data_path="rotation_euler", index=2)
 
     def display_ball(self) -> None:
+        """Create a ball object based on the ball track."""
         bpy.ops.object.select_all(action="DESELECT")
         bpy.ops.mesh.primitive_uv_sphere_add(radius=0.124, location=(0, 0, 0))
         ball_obj: bpy.types.Object = bpy.context.active_object
@@ -210,6 +222,7 @@ class bvh_to_glb:
             ball_obj.keyframe_insert(data_path="location", index=-1)
 
     def convert_bvh_to_glb(self, output_name: str) -> None:
+        """Driver method for conversion."""
         display_ball: bool = False
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
@@ -255,7 +268,7 @@ class bvh_to_glb:
                 bone.bone.use_relative_parent = True
                 self.create_sphere_at_bone(bone.bone, armature)
                 if bone.bone.parent:
-                    self.create_cone_arm(bone.bone, armature)
+                    self.create_bone_connector(bone.bone, armature)
                 if bone.name == "pelvis":
                     self.create_name_boxes(armature)
 
@@ -273,6 +286,6 @@ if __name__ == "__main__":
         output_path=sys.argv[2],
         player_csv=sys.argv[3],
         ball_csv=sys.argv[4],
-        field_obj=sys.argv[5]
+        field_obj=sys.argv[5],
     )
     converter.convert_bvh_to_glb(converter.output_path + "/Pose3D")
