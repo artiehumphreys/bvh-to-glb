@@ -14,6 +14,7 @@ class bvh_to_glb:
         output_path: str = "final_files",
         player_csv: str = r"data/players 1.csv",
         ball_csv: str = "data/Ball_Track.csv",
+        field_obj: str = "rendering/court.obj"
     ) -> None:
         self.output_path: str = output_path
         self.filename: str = ""
@@ -22,6 +23,7 @@ class bvh_to_glb:
         self.ball_track: dict[int, tuple] = {}
         self.scale: float = 1.25
         self.dir: str = dir
+        self.field_obj = field_obj
         self.start_frame, self.end_frame = 0, 0
         self.player_csv = player_csv
         self.process_players(self.dir)
@@ -212,7 +214,7 @@ class bvh_to_glb:
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
         try:
-            bpy.ops.wm.obj_import(filepath="rendering/court.obj")
+            bpy.ops.wm.obj_import(filepath=self.field_obj)
         except:
             print(
                 "If you would like to include a field/court in the animation, ensure that the path is correct. 'rendering/court.obj'"
@@ -271,5 +273,6 @@ if __name__ == "__main__":
         output_path=sys.argv[2],
         player_csv=sys.argv[3],
         ball_csv=sys.argv[4],
+        field_obj=sys.argv[5]
     )
     converter.convert_bvh_to_glb(converter.output_path + "/Pose3D")
