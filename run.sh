@@ -10,6 +10,8 @@ trap cleanup INT
 OS=$(uname)
 echo "Detected OS: $OS"
 
+cd $(pwd) || exit
+
 if [[ "$OS" == "Darwin" ]]; then
     echo "Running on macOS"
     if ! command -v brew &>/dev/null; then
@@ -58,7 +60,6 @@ $p convert_scripts/bvh_to_glb.py $bvh_dir $output_dir $players_csv $ball_csv $fi
 
 cd babylon_viewer
 id=$(chrome-cli list links | grep 'localhost:5500' | awk -F'[:\\]]' '{print $2}' | awk '{print $1}')
-echo "Starting HTTP server..."
 p="../venv/bin/python"
 $p -m http.server 5500 &
 HTTP_SERVER_PID=$!
@@ -76,6 +77,5 @@ else
     $chrome_cmd activate -t $id
     $chrome_cmd reload -t $id
 fi
-
 wait $HTTP_SERVER_PID
 cd ..
