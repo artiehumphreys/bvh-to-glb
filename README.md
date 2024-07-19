@@ -10,6 +10,8 @@ cd bvh-to-glb/
 source run.sh
 ```
 That's it! The script will ensure all dependencies are properly handled.
+### Note: 
+The Blender API (bpy 4.1.0) only works on Python 3.8-3.11. Please ensure that you have a compatible version installed and present in your path variable before continuing.
 ## Other Notes
 ### Customizing the Shell Script
 You can edit the provided shell script to ensure it points to the correct directories containing your .bvh files. Modify the paths in `run.sh` to match your folder structure for seamless operation.
