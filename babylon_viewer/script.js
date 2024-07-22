@@ -1,48 +1,26 @@
 const canvas = document.getElementById("renderCanvas");
-
 const engine = new BABYLON.Engine(canvas);
+const slider = document.getElementById("slider");
+const dropdown = document.getElementById("cameraSelect");
 
 let num = 0;
-
 let isPaused = false;
-
 let frame = 0;
-
 let currentFrame = 0;
 let maxFrame = 0;
-
-const slider = document.getElementById("slider");
+let scene = null;
+let camera = null;
+let cameraHeads = [];
 
 const createScene = () => {
   const fileName = "Pose3D_BKN_UTA.glb";
-  const scene = new BABYLON.Scene(engine);
+  scene = new BABYLON.Scene(engine);
   console.log(`Loading model: ${fileName}`);
-  let camera = null;
 
   BABYLON.SceneLoader.Append("", fileName, scene, function (scene) {
-    let headNode = findHead(scene, num);
-    let name = headNode?.name?.split("_")[2] ?? "Default";
-    displayName(name);
-    if (headNode === null) {
-      camera = new BABYLON.ArcRotateCamera(
-        "camera1",
-        -Math.PI / 2,
-        Math.PI / 2,
-        2,
-        new BABYLON.Vector3(0, 1, 0),
-        scene
-      );
-      scene.createDefaultCameraOrLight(true, true, true);
-    } else {
-      camera = new BABYLON.TargetCamera(
-        "camera1",
-        new BABYLON.Vector3(0, 0, -3),
-        scene
-      );
-      camera.parent = headNode;
-      camera.setTarget(headNode.getAbsolutePosition());
-    }
-    camera.attachControl(canvas, true);
+    cameraHeads = findHeads(scene);
+    populateDropdown();
+    setCamera(cameraHeads[num]);
     const light = new BABYLON.HemisphericLight(
       "light",
       new BABYLON.Vector3(1, 1, 0),
@@ -76,25 +54,49 @@ function updateSlider() {
   }
 }
 
-function findHead(scene) {
-  const cameraHeads = scene.meshes.filter((node) =>
+function findHeads(scene) {
+  let cameras = scene.meshes.filter((node) =>
     node.name.includes("sphere_baseHead")
   );
-  cameraHeads.unshift(null);
-  if (cameraHeads.length === 1) {
-    console.error("Head node not found in the scene.");
-    return null;
-  }
-  num++;
-  if (num >= cameraHeads.length) {
-    num = 1;
-  }
-  return cameraHeads[num - 1];
+  cameras.unshift(null);
+  return cameras;
 }
 
-function displayName(name) {
-  const nametag = document.getElementById("nametag");
-  nametag.innerHTML = name;
+function populateDropdown() {
+  dropdown.innerHTML = "";
+  cameraHeads.forEach((head, index) => {
+    const option = document.createElement("option");
+    option.value = index;
+    option.textContent = head ? head.name.split("_")[2] : "Default";
+    dropdown.appendChild(option);
+  });
+}
+
+function setCamera(headNode) {
+  if (camera) {
+    camera.detachControl(canvas);
+  }
+
+  if (headNode === null) {
+    camera = new BABYLON.ArcRotateCamera(
+      "camera1",
+      -Math.PI / 2,
+      Math.PI / 2,
+      2,
+      new BABYLON.Vector3(0, 1, 0),
+      scene
+    );
+    scene.createDefaultCameraOrLight(true, true, true);
+  } else {
+    camera = new BABYLON.TargetCamera(
+      "camera1",
+      new BABYLON.Vector3(0, 0, -3),
+      scene
+    );
+    camera.parent = headNode;
+    camera.setTarget(headNode.getAbsolutePosition());
+  }
+  camera.attachControl(canvas, true);
 }
 
 function play() {
@@ -120,6 +122,11 @@ window.addEventListener("keydown", function (e) {
   }
 });
 
+dropdown.addEventListener("change", function () {
+  num = parseInt(this.value);
+  setCamera(cameraHeads[num]);
+});
+
 slider.onchange = function () {
   isPaused = false;
   play();
@@ -135,4 +142,4 @@ slider.oninput = function () {
   });
 };
 
-let scene = createScene();
+scene = createScene();
