@@ -125,6 +125,7 @@ window.addEventListener("keydown", function (e) {
 dropdown.addEventListener("change", function () {
   num = parseInt(this.value);
   setCamera(cameraHeads[num]);
+  scene = createScene();
 });
 
 slider.onchange = function () {
