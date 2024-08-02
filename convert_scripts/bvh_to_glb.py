@@ -27,7 +27,9 @@ class bvh_to_glb:
         self.start_frame, self.end_frame = 0, 0
         self.player_csv = player_csv
         self.process_players(self.dir)
-        self.read_ball_csv(ball_csv)
+        if ball_csv != "":
+            self.read_ball_csv(ball_csv)
+        self.count = 0
 
     def get_team(self) -> str:
         """Getter method for fetching player team."""
@@ -36,8 +38,11 @@ class bvh_to_glb:
 
     def get_player_name(self) -> str:
         """Getter method for fetching player name based on unique id. This feature is not required."""
-        split: list[str] = self.filename.split("_")
-        return self.player_ids[int(split[2])]
+        try:
+            split: list[str] = self.filename.split("_")
+            return self.player_ids[int(split[2])]
+        except:
+            return ""
 
     def process_players(self, directory: str) -> None:
         """Initalize dictionary for player name mappings based on file name."""
@@ -49,7 +54,8 @@ class bvh_to_glb:
             if not split[1] in self.teams:
                 self.teams[split[1]] = len(self.teams)
             self.player_ids[int(split[2])] = ""
-        self.read_player_csv()
+        if self.player_csv != "":
+            self.read_player_csv()
 
     def read_player_csv(self) -> None:
         """Read the player id and name from a .csv file. This is solely for the nametag feature and is not required. The file can be specified in run.sh."""
@@ -282,10 +288,10 @@ class bvh_to_glb:
 
 if __name__ == "__main__":
     converter = bvh_to_glb(
-        dir=sys.argv[1],
-        output_path=sys.argv[2],
-        player_csv=sys.argv[3],
-        ball_csv=sys.argv[4],
-        field_obj=sys.argv[5],
+        dir=sys.argv[1] if len(sys.argv) > 1 else "output_BVH",
+        output_path=sys.argv[2] if len(sys.argv) > 2 else "final_files",
+        player_csv=sys.argv[3] if len(sys.argv) > 3 else "",
+        ball_csv=sys.argv[4] if len(sys.argv) > 4 else "",
+        field_obj=sys.argv[5] if len(sys.argv) > 5 else "",
     )
     converter.convert_bvh_to_glb(converter.output_path + "/Pose3D")
